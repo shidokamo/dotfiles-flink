@@ -54,28 +54,5 @@ stop-cluster:
 	-${FLINK_HOME}/sbin/stop-slaves.sh
 	-${FLINK_HOME}/sbin/stop-master.sh
 
-# Simple test
 test:
-	# cd ${SPARK_HOME} && ./bin/pyspark
-	${SPARK_HOME}/bin/spark-submit \
-		--master spark://`hostname`:7077 \
-		${SPARK_HOME}/examples/src/main/python/pi.py 1000
-
-test2:
-	${SPARK_HOME}/bin/spark-submit \
-		--class org.apache.spark.examples.SparkPi \
-		--master spark://`hostname`:7077 \
-		${SPARK_HOME}/examples/jars/spark-examples_2.11-2.4.4.jar 10000
-
-test2-core1:
-	${SPARK_HOME}/bin/spark-submit \
-		--class org.apache.spark.examples.SparkPi \
-		--master spark://`hostname`:7077 \
-		--total-executor-cores 1 \
-		${SPARK_HOME}/examples/jars/spark-examples_2.11-2.4.4.jar 10000
-
-test3:
-	${SPARK_HOME}/bin/spark-submit \
-		--master spark://`hostname`:7077 \
-		--packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.4 \
-		src/wc.py ${KAFKA_ENDPOINT}
+	sed '1,27d' example/bible.txt | sed '99844,$$d' > tmp.txt
