@@ -10,7 +10,7 @@ FLINK_USER    := ${USER}
 KAFKA_ENDPOINT := 172.16.130.5:31090
 MACHINE       := n1-standard-1
 export
-WORKERS       := w0 w1 w2
+WORKERS       := w0 w1
 
 # Install Spark to master
 install:
@@ -32,27 +32,27 @@ delete-worker:delete-known-host
 
 # Update config
 gen_conf:
-	echo "SPARK_MASTER_HOST=$(shell hostname)" > conf/spark-env.sh
-	echo "SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}" >> conf/spark-env.sh
-	echo "SPARK_EXECUTOR_MEMORY=${SPARK_EXECUTOR_MEMORY}" >> conf/spark-env.sh
-	echo "PYSPARK_PYTHON=${PYSPARK_PYTHON}" >> conf/spark-env.sh
-	echo "PYSPARK_DRIVER_PYTHON=${PYSPARK_DRIVER_PYTHON}" >> conf/spark-env.sh
+	# echo "SPARK_MASTER_HOST=$(shell hostname)" > conf/spark-env.sh
+	# echo "SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}" >> conf/spark-env.sh
+	# echo "SPARK_EXECUTOR_MEMORY=${SPARK_EXECUTOR_MEMORY}" >> conf/spark-env.sh
+	# echo "PYSPARK_PYTHON=${PYSPARK_PYTHON}" >> conf/spark-env.sh
+	# echo "PYSPARK_DRIVER_PYTHON=${PYSPARK_DRIVER_PYTHON}" >> conf/spark-env.sh
 config-master:gen_conf
-	echo ${WORKERS} | sed 's/\s\+/\n/g' > ${SPARK_HOME}/conf/slaves
-	#echo $(shell hostname) >> ${SPARK_HOME}/conf/slave
+	echo ${WORKERS} | sed 's/\s\+/\n/g' > ${FLINK_HOME}/conf/slaves
+	#echo $(shell hostname) >> ${SPARK_HOME}/conf/slaves
 	ssh ${USER}@localhost echo "Login test" || cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-	cp conf/* ${SPARK_HOME}/conf/
+	cp conf/* ${FLINK_HOME}/conf/
 config-slave:gen_conf
 	# Copy config files to workers
-	for i in ${WORKERS}; do gcloud compute scp --recurse conf $$i:${SPARK_HOME}; done
+	for i in ${WORKERS}; do gcloud compute scp --recurse conf $$i:${FLINK_HOME}; done
 
 # Run cluster
 start-cluster:stop-cluster config-slave config-master
-	${SPARK_HOME}/sbin/start-master.sh
-	${SPARK_HOME}/sbin/start-slaves.sh
+	${FLINK_HOME}/bin/start-master.sh
+	${FLINK_HOME}/bin/start-slaves.sh
 stop-cluster:
-	-${SPARK_HOME}/sbin/stop-slaves.sh
-	-${SPARK_HOME}/sbin/stop-master.sh
+	-${FLINK_HOME}/sbin/stop-slaves.sh
+	-${FLINK_HOME}/sbin/stop-master.sh
 
 # Simple test
 test:
