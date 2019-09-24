@@ -56,3 +56,4 @@ stop-cluster:
 
 test:
 	sed '1,27d' example/bible.txt | sed '99844,$$d' > tmp.txt
+	${FLINK_HOME}/bin/flink run ${FLINK_HOME}/examples/batch/WordCount.jar --input example/bible.txt --output wc.out
