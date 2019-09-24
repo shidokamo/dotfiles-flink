@@ -1,5 +1,6 @@
 FLINK_HOME    := /opt/flink
 FLINK_VERSION := flink-1.9.0
+FLINK_SCALA_VERSION := 2.12
 STARTUP_SCRIPT := $(abspath ./startup-script.sh)
 FLINK_USER    := ${USER}
 # FLINK_WORKER_MEMORY := 3g

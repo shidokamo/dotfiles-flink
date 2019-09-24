@@ -30,11 +30,11 @@ python3 get-pip.py
 
 echo '----- Install Flink -----'
 cd /tmp
-wget http://apache.cs.utah.edu/flink/${FLINK_VERSION}/${FLINK_VERSION}-bin-scala_2.11.tgz
-tar xvzf ${FLINK_VERSION}-bin-scala_2.11.tgz
-rm ${FLINK_VERSION}-bin-scala_2.11.tgz
+wget http://apache.cs.utah.edu/flink/${FLINK_VERSION}/${FLINK_VERSION}-bin-scala_${FLINK_SCALA_VERSION}.tgz
+tar xvzf ${FLINK_VERSION}-bin-scala_${FLINK_SCALA_VERSION}.tgz
+rm ${FLINK_VERSION}-bin-scala_${FLINK_SCALA_VERSION}.tgz
 mkdir -p ${FLINK_HOME}
-mv ${FLINK_VERSION}-bin-scala_2.11.tgz/* ${FLINK_HOME}/
+mv ${FLINK_VERSION}/* ${FLINK_HOME}/
 
 # Change owner and add full access
 chown ${FLINK_USER} -R ${FLINK_HOME}
