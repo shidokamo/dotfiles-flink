@@ -24,7 +24,7 @@ uninstall:
 workers:${WORKERS}
 ${WORKERS}:
 	./create-vm.sh $@
-	gcloud compute scp ~/.ssh/id_rsa.pub $@:~/.ssh/authorized_keys
+	-gcloud compute scp ~/.ssh/id_rsa.pub $@:~/.ssh/authorized_keys
 check-worker-log:
 	for i in ${WORKERS}; do echo "----- $$i -----"; gcloud compute ssh $$i --command="grep 'startup-script.*Return code' /var/log/syslog"; done
 delete-known-host:
@@ -40,6 +40,7 @@ gen_conf:
 	echo "parallelism.default: ${FLINK_WORKER_TOTAL_CPU}" >> conf/flink-conf.yaml
 config-host:delete-known-host
 	ssh ${USER}@localhost echo "Login test" || cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+	for i in ${WORKERS}; do gcloud compute scp ~/.ssh/id_rsa.pub $$i:~/.ssh/authorized_keys; done
 config-master:gen_conf config-host
 	echo ${WORKERS} | sed 's/\s\+/\n/g' > ${FLINK_HOME}/conf/slaves
 	#echo $(shell hostname) >> ${SPARK_HOME}/conf/slaves
