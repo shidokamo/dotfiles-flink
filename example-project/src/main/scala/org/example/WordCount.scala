@@ -47,7 +47,8 @@ object WordCount {
       .sum(1)
 
     // execute and print result
-    counts.print()
+    // counts.print()
+    counts.writeAsCsv("out.csv", "\n", " ")
 
   }
 }
