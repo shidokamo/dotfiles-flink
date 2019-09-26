@@ -19,14 +19,21 @@ package org.example
  */
 
 import org.apache.flink.api.scala._
+import org.apache.flink.api.java.utils.ParameterTool
 
 object Job {
   def main(args: Array[String]): Unit = {
+
+    val params: ParameterTool = ParameterTool.fromArgs(args)
+
     // set up the execution environment
-    val myenv = ExecutionEnvironment.getExecutionEnvironment
+    val env = ExecutionEnvironment.getExecutionEnvironment
+
+    // make parameters available in the web interface
+    env.getConfig.setGlobalJobParameters(params)
 
     // get input data
-    val text = myenv.readTextFile("/opt/flink/bible.txt")
+    val text = env.readTextFile(params.get("input"))
 
     val counts = text.flatMap { _.toLowerCase.split("\\W+") }
       .map { (_, 1) }
@@ -36,6 +43,6 @@ object Job {
     // execute and print result
     counts.print()
     // execute program
-    // myenv.execute("Flink Scala API Skeleton")
+    env.execute("Flink Scala Word Count Example")
   }
 }
