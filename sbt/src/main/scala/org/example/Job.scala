@@ -38,34 +38,19 @@ import org.apache.flink.api.scala._
 object Job {
   def main(args: Array[String]): Unit = {
     // set up the execution environment
-    val env = ExecutionEnvironment.getExecutionEnvironment
+    val myenv = ExecutionEnvironment.getExecutionEnvironment
 
-    /**
-     * Here, you can start creating your execution plan for Flink.
-     *
-     * Start with getting some data from the environment, like
-     * env.readTextFile(textPath);
-     *
-     * then, transform the resulting DataSet[String] using operations
-     * like:
-     *   .filter()
-     *   .flatMap()
-     *   .join()
-     *   .group()
-     *
-     * and many more.
-     * Have a look at the programming guide:
-     *
-     * http://flink.apache.org/docs/latest/programming_guide.html
-     *
-     * and the examples
-     *
-     * http://flink.apache.org/docs/latest/examples.html
-     *
-     */
+    // get input data
+    val text = myenv.readTextFile("/opt/flink/bible.txt")
 
+    val counts = text.flatMap { _.toLowerCase.split("\\W+") }
+      .map { (_, 1) }
+      .groupBy(0)
+      .sum(1)
 
+    // execute and print result
+    counts.print()
     // execute program
-    env.execute("Flink Scala API Skeleton")
+    // myenv.execute("Flink Scala API Skeleton")
   }
 }
