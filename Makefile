@@ -57,14 +57,14 @@ stop-cluster:
 	-${FLINK_HOME}/bin/stop-cluster.sh
 
 test:
-	sed '1,27d' example/bible.txt | sed '99844,$$d' > tmp.txt
+	sed '1,27d' data/bible.txt | sed '99844,$$d' > tmp.txt
 	cp tmp.txt ${FLINK_HOME}/bible.txt
 	for i in ${WORKERS}; do gcloud compute scp tmp.txt $$i:/opt/flink/bible.txt; done
 	rm tmp.txt
 	${FLINK} run ${FLINK_HOME}/examples/batch/WordCount.jar --input "file:${FLINK_HOME}/bible.txt" --output "file:${FLINK_HOME}/wc.out"
 
 test2:
-	sed '1,27d' example/bible.txt | sed '99844,$$d' > tmp.txt
+	sed '1,27d' data/bible.txt | sed '99844,$$d' > tmp.txt
 	cp tmp.txt ${FLINK_HOME}/bible.txt
 	for i in ${WORKERS}; do gcloud compute scp tmp.txt $$i:/opt/flink/bible.txt; done
 	rm tmp.txt
