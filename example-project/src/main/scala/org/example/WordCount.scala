@@ -49,6 +49,7 @@ object WordCount {
     // execute and print result
     // counts.print()
     counts.writeAsCsv("out.csv", "\n", " ")
+    env.execute("Scala WordCount Example")
 
   }
 }
