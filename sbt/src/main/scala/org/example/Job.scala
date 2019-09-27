@@ -41,7 +41,8 @@ object Job {
       .sum(1)
 
     // execute and print result
-    counts.print()
+    // counts.print()
+    counts.writeAsCsv(params.get("output"), "\n", " ")
     // execute program
     env.execute("Flink Scala Word Count Example")
   }

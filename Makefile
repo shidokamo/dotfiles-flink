@@ -1,6 +1,6 @@
 FLINK_HOME    := /opt/flink
 FLINK_VERSION := flink-1.9.0
-FLINK_SCALA_VERSION := 2.12
+FLINK_SCALA_VERSION := 2.11
 STARTUP_SCRIPT := $(abspath ./startup-script.sh)
 FLINK_USER    := ${USER}
 FLINK_WORKER_MEMORY := 2600m
@@ -63,10 +63,15 @@ test:
 	rm tmp.txt
 	${FLINK} run ${FLINK_HOME}/examples/batch/WordCount.jar --input "file:${FLINK_HOME}/bible.txt" --output "file:${FLINK_HOME}/wc.out"
 
-test2:
+test2:test2-compile
 	sed '1,27d' data/bible.txt | sed '99844,$$d' > tmp.txt
 	cp tmp.txt ${FLINK_HOME}/bible.txt
 	for i in ${WORKERS}; do gcloud compute scp tmp.txt $$i:/opt/flink/bible.txt; done
 	rm tmp.txt
+	${FLINK} run \
+		-c org.example.Job \
+		sbt/target/scala-2.11/sbt-assembly-0.1-SNAPSHOT.jar \
+		--input "file:${FLINK_HOME}/bible.txt" \
+		--output "file:${FLINK_HOME}/wc.out"
+test2-compile:
 	cd sbt && sbt clean assembly
-	${FLINK} run -c org.example.Job sbt/target/scala-2.12/sbt-assembly-0.1-SNAPSHOT.jar

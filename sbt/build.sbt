@@ -9,7 +9,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "org.example"
 
-ThisBuild / scalaVersion := "2.12.10"
+ThisBuild / scalaVersion := "2.11.12"
 
 val flinkVersion = "1.9.0"
 
