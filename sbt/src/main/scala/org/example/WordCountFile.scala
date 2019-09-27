@@ -21,7 +21,7 @@ package org.example
 import org.apache.flink.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
 
-object Job {
+object WordCountFile {
   def main(args: Array[String]): Unit = {
 
     val params: ParameterTool = ParameterTool.fromArgs(args)
