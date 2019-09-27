@@ -1,7 +1,9 @@
 package org.example
 
+import java.util.Properties
 import org.apache.flink.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010,FlinkKafkaProducer010}
 
 object WordCountKafka {
   def main(args: Array[String]): Unit = {
@@ -20,9 +22,9 @@ object WordCountKafka {
     properties.setProperty("group.id", "test")
 
     // Kafka connector with schema to deserialize the data
-    stream = env
-            .addSource(new FlinkKafkaConsumer010[String]("test-topic", new SimpleStringSchema(), properties))
-            .print()
+    val stream = env
+                .addSource(new FlinkKafkaConsumer010[String]("test-topic", new SimpleStringSchema(), properties))
+                .print()
 
     // Kafka Start position
     stream.setStartFromLatest()
