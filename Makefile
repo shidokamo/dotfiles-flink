@@ -6,7 +6,7 @@ FLINK_USER    := ${USER}
 FLINK_WORKER_MEMORY := 2600m
 FLINK_WORKER_CPU := 1
 FLINK_WORKER_TOTAL_CPU := 2
-KAFKA_ENDPOINT := 172.16.130.5:31090
+KAFKA_ENDPOINT := 172.16.128.5:31090
 MACHINE       := n1-standard-1
 # FLINKEXECUTOR_MEMORY := 3g
 # PYFLINK_PYTHON := /usr/bin/python3
@@ -79,3 +79,8 @@ test3:test-compile
 		sbt/target/scala-2.11/sbt-assembly-0.1-SNAPSHOT.jar \
 		--input "file:${FLINK_HOME}/bible.txt" \
 		--output "file:${FLINK_HOME}/wc.out"
+test4:test-compile
+	${FLINK} run \
+		-c org.example.WordCountKafka \
+		sbt/target/scala-2.11/sbt-assembly-0.1-SNAPSHOT.jar \
+		--broker "${KAFKA_ENDPOINT}"
