@@ -48,6 +48,6 @@ object WordCount {
 
     // execute and print result
     counts.print()
-
+    // env.execute("Flink Scala Word Count Example 1") // Should not include this.
   }
 }

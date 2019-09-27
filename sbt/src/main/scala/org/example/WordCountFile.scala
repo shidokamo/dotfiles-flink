@@ -44,6 +44,6 @@ object WordCountFile {
     // counts.print()
     counts.writeAsCsv(params.get("output"), "\n", " ")
     // execute program
-    env.execute("Flink Scala Word Count Example")
+    env.execute("Flink Scala Word Count Example 2")
   }
 }
