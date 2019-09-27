@@ -15,7 +15,9 @@ val flinkVersion = "1.9.0"
 
 val flinkDependencies = Seq(
   "org.apache.flink" %% "flink-scala" % flinkVersion % "provided",
-  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided")
+  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided"
+  "org.apache.flink" %% "flink-connector-kafka-0.10" % flinkVersion)
+  )
 
 lazy val root = (project in file(".")).
   settings(
