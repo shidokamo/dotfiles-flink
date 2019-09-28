@@ -4,7 +4,10 @@ import java.util.Properties
 import org.apache.flink.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
 // import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010,FlinkKafkaProducer010}
+// import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+// import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011
+// import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 // import org.apache.flink.streaming.util.serialization.{JsonDeserializationSchema,SimpleStringSchema}
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
@@ -28,7 +31,7 @@ object WordCountKafka {
     val consumer = new FlinkKafkaConsumer010[String]("test-topic", new SimpleStringSchema(), properties)
 
     // Kafka start position
-    consumer.setStartFromLatest()
+    // consumer.setStartFromLatest()
 
     val stream = env.addSource(consumer).print()
     env.execute("Flink Scala Kafka Word Count Example")
