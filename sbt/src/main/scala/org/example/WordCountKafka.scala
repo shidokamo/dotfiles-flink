@@ -33,19 +33,28 @@ object WordCountKafka {
     // Kafka start position
     // consumer.setStartFromLatest()
 
-    val stream = env.addSource(consumer).print()
-    env.execute("Flink Scala Kafka Word Count Example")
+    val stream = env.addSource(consumer)
     // stream.print()
 
-    // val counts = stream.map { _.toLowerCase.split("\\W+") }
-    //   .map { (_, 1) }
-    //   .groupBy(0)
-    //   .sum(1)
+    val lower = stream.iterate( iteration => {
+          val lower = iteration.map(v => v.toLowerCase)
+          (lower)
+    })
+//      .map((_,1))
+//      .groupBy(0)
+//      .keyBy(0)
+//      .sum(1)
+//      .map { x => (x[0]) }
+//      .filter(_.noEmpty)
+//      .map { (_, 1) }
+//      .groupBy(0)
+//      .keyBy(0)
+//      .sum(1)
 
     // execute and print result
-    // counts.print()
+    lower.print()
     // counts.writeAsCsv(params.get("output"), "\n", " ")
-    // execute program
-    // env.execute("Flink Scala Word Count Example 2")
+
+    env.execute("Flink Scala Kafka Word Count Example")
   }
 }
