@@ -6,17 +6,20 @@ import org.apache.flink.api.java.utils.ParameterTool
 // import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010,FlinkKafkaProducer010}
 // import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer08
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+import org.apache.flink.streaming.api.scala.DataStream
 // import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011
 // import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+// import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment // Serious MISTAKE
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 // import org.apache.flink.streaming.util.serialization.{JsonDeserializationSchema,SimpleStringSchema}
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
+
 
 object WordCountKafka {
   def main(args: Array[String]): Unit = {
 
     // set up the execution environment
-    val env = StreamExecutionEnvironment.getExecutionEnvironment()
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     val params: ParameterTool = ParameterTool.fromArgs(args)
     // make parameters available in the web interface
@@ -34,12 +37,8 @@ object WordCountKafka {
     // consumer.setStartFromLatest()
 
     val stream = env.addSource(consumer)
-    // stream.print()
 
-    val lower = stream.iterate( iteration => {
-          val lower = iteration.map(v => v.toLowerCase)
-          (lower)
-    })
+    val lower = stream.map(v => (v.toLowerCase, 1))
 //      .map((_,1))
 //      .groupBy(0)
 //      .keyBy(0)
