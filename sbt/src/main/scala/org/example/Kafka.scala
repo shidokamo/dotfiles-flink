@@ -1,9 +1,12 @@
 package org.example
 
 import java.util.Properties
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.apache.flink.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.streaming.util.serialization.JsonDeserializationSchema
+// import org.apache.flink.streaming.util.serialization.JSONDeserializationSchema // 廃止されたっぽい
+import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
+// import org.apache.flink.formats.json.JsonNodeDeserializationSchema
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer010
 import org.apache.flink.streaming.api.scala.DataStream
@@ -25,22 +28,27 @@ object Kafka {
     properties.setProperty("group.id", "org.apache.flink")
 
     // Kafka consumer withe schema to deserialize the data
-    val consumer = new FlinkKafkaConsumer010[String](params.get("log",) new JsonDeserializationSchema(), properties)
+    val consumer = new FlinkKafkaConsumer010[ObjectNode](params.get("topic"), new JSONKeyValueDeserializationSchema(true), properties)
 
     // Kafka start position
     consumer.setStartFromLatest()
 
     val stream = env.addSource(consumer)
 
-    val lower = stream
-      .filter(_.trim.nonEmpty)
-      .map(v => (v.toLowerCase, 1))
-//      .groupBy(0)
+    val data = stream
+      .map{ v =>
+        val key = v.get("category")
+        val score = v.get("score")
+        (key, score, cost)
+      }
       .keyBy(0)
-      .sum(1)
+      .timeWindow(Time.of(2500, MILLISECONDS), Time.of(500, MILLISECONDS))
+      .min(1)
+//      .groupBy(0)
+//      .sum(1)
 
     // execute and print result
-    lower.print()
+    data.print()
     // counts.writeAsCsv(params.get("output"), "\n", " ")
 
     env.execute("Flink Scala Kafka Word Count Example")

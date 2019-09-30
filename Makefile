@@ -88,4 +88,5 @@ test5:test-compile
 	${FLINK} run \
 		-c org.example.Kafka \
 		sbt/target/scala-2.11/sbt-assembly-0.1-SNAPSHOT.jar \
-		--broker "${KAFKA_ENDPOINT}"
+		--broker "${KAFKA_ENDPOINT}" \
+		--topic "logger"
