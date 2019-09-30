@@ -28,7 +28,7 @@ object Kafka {
     properties.setProperty("group.id", "org.apache.flink")
 
     // Kafka consumer withe schema to deserialize the data
-    val consumer = new FlinkKafkaConsumer010[ObjectNode](params.get("topic"), new JSONKeyValueDeserializationSchema(true), properties)
+    val consumer = new FlinkKafkaConsumer010(params.get("topic"), new JSONKeyValueDeserializationSchema(false), properties)
 
     // Kafka start position
     consumer.setStartFromLatest()
