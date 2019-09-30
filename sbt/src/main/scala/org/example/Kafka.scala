@@ -23,6 +23,8 @@ object Kafka {
     val params: ParameterTool = ParameterTool.fromArgs(args)
     // make parameters available in the web interface
     env.getConfig.setGlobalJobParameters(params)
+    println(params.get("broker"))
+    println(params.get("topic"))
 
     // Kafka connector properties
     val properties = new Properties()
@@ -30,25 +32,25 @@ object Kafka {
     properties.setProperty("group.id", "org.apache.flink")
 
     // Kafka consumer withe schema to deserialize the data
-    val consumer = new FlinkKafkaConsumer010(params.get("topic"), new JSONKeyValueDeserializationSchema(false), properties)
+    val consumer = new FlinkKafkaConsumer010(params.get("topic"), new JSONKeyValueDeserializationSchema(true), properties)
     val publisher = new FlinkKafkaProducer010[String](params.get("broker"), "out", new SimpleStringSchema)
 
     // Kafka start position
-    // consumer.setStartFromLatest()
+    consumer.setStartFromLatest()
 
     val stream = env.addSource(consumer)
 
     val data = stream
- //     .filter{ v =>
- //       v.get("category") != null
- //     }
-      .map{ v =>
-//        val key = v.get("category").asText
-        val score = v.get("score")
-        val cost = v.get("cost")
-        println(score)
-        ("mykey", score, cost)
-      }
+        .map{ x =>
+          val v = x.get("value")
+          val key = v.get("category").asText
+          val score = v.get("score").asDouble
+          val cost = v.get("cost").asDouble
+          println(cost)
+          (key, cost, score)
+        }
+        .keyBy(0)
+//        .sum(1)
 //      .keyBy(0)
 //      .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS), Time.of(500, TimeUnit.MILLISECONDS))
 //      .min(1)
