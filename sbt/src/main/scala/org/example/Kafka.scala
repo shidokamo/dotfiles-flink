@@ -46,15 +46,13 @@ object Kafka {
           val key = v.get("category").asText
           val score = v.get("score").asDouble
           val cost = v.get("cost").asDouble
-          println(cost)
+          println( (key, cost, score) )
           (key, cost, score)
         }
         .keyBy(0)
-//        .sum(1)
-//      .keyBy(0)
-//      .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS), Time.of(500, TimeUnit.MILLISECONDS))
-//      .min(1)
-//      .groupBy(0)
+//        .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS), Time.of(500, TimeUnit.MILLISECONDS)) // Should be after Key
+        .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS))
+        .min(1)
 //      .sum(1)
 //      .addSink(publisher)
 //      .name("kafka")
