@@ -1,16 +1,18 @@
 package org.example
 
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.apache.flink.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
 // import org.apache.flink.streaming.util.serialization.JSONDeserializationSchema // 廃止されたっぽい
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
-// import org.apache.flink.formats.json.JsonNodeDeserializationSchema
+import org.apache.flink.streaming.util.serialization.SimpleStringSchema
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer010
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.windowing.time.Time
 
 object Kafka {
   def main(args: Array[String]): Unit = {
@@ -29,23 +31,31 @@ object Kafka {
 
     // Kafka consumer withe schema to deserialize the data
     val consumer = new FlinkKafkaConsumer010(params.get("topic"), new JSONKeyValueDeserializationSchema(false), properties)
+    val publisher = new FlinkKafkaProducer010[String](params.get("broker"), "out", new SimpleStringSchema)
 
     // Kafka start position
-    consumer.setStartFromLatest()
+    // consumer.setStartFromLatest()
 
     val stream = env.addSource(consumer)
 
     val data = stream
+ //     .filter{ v =>
+ //       v.get("category") != null
+ //     }
       .map{ v =>
-        val key = v.get("category")
+//        val key = v.get("category").asText
         val score = v.get("score")
-        (key, score, cost)
+        val cost = v.get("cost")
+        println(score)
+        ("mykey", score, cost)
       }
-      .keyBy(0)
-      .timeWindow(Time.of(2500, MILLISECONDS), Time.of(500, MILLISECONDS))
-      .min(1)
+//      .keyBy(0)
+//      .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS), Time.of(500, TimeUnit.MILLISECONDS))
+//      .min(1)
 //      .groupBy(0)
 //      .sum(1)
+//      .addSink(publisher)
+//      .name("kafka")
 
     // execute and print result
     data.print()

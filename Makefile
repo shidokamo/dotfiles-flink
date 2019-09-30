@@ -89,4 +89,4 @@ test5:test-compile
 		-c org.example.Kafka \
 		sbt/target/scala-2.11/sbt-assembly-0.1-SNAPSHOT.jar \
 		--broker "${KAFKA_ENDPOINT}" \
-		--topic "logger"
+		--topic logger
