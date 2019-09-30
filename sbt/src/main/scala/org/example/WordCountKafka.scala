@@ -38,17 +38,12 @@ object WordCountKafka {
 
     val stream = env.addSource(consumer)
 
-    val lower = stream.map(v => (v.toLowerCase, 1))
-//      .map((_,1))
+    val lower = stream
+      .filter(_.trim.nonEmpty)
+      .map(v => (v.toLowerCase, 1))
 //      .groupBy(0)
-//      .keyBy(0)
-//      .sum(1)
-//      .map { x => (x[0]) }
-//      .filter(_.noEmpty)
-//      .map { (_, 1) }
-//      .groupBy(0)
-//      .keyBy(0)
-//      .sum(1)
+      .keyBy(0)
+      .sum(1)
 
     // execute and print result
     lower.print()
