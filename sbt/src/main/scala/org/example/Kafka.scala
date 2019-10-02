@@ -58,7 +58,7 @@ object Kafka {
     val timestamped = events.assignTimestampsAndWatermarks(
       new BoundedOutOfOrdernessTimestampExtractor[ObjectNode](Time.seconds(10)) {
           override def extractTimestamp(element: ObjectNode): Long = {
-            val v = x.get("value")
+            val v = element.get("value")
             val t = v.get("created").asLong
             return t * 1000 // to msec ?
           }
@@ -77,22 +77,22 @@ object Kafka {
           println(v)
           (key, cost, score)
         }
-//        .keyBy(0)
+        .keyBy(0)
 //        .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS), Time.of(500, TimeUnit.MILLISECONDS)) // Should be after Key
 //        .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS))
 //        .countWindow(5, 1)
-//        .window(SlidingEventTimeWindows.of(Time.seconds(5), Time.seconds(1)))
-//        .min(1)
-//        .map { v =>
-//          println(v)
-//          v
-//          // val zdt = new Date(v.time).toInstant().atZone(ZoneId.systemDefault())
-//          // val time = fmt.format(zdt)
-//          // val json = Map("time" -> time, "bid" -> v.bid, "min" -> v.min)
-//          // val retval = JSONObject(json).toString()
-//          // println(retval)
-//          // retval
-//        }
+        .window(SlidingEventTimeWindows.of(Time.seconds(5), Time.seconds(1)))
+        .min(1)
+        .map { v =>
+          println(v)
+          v
+          // val zdt = new Date(v.time).toInstant().atZone(ZoneId.systemDefault())
+          // val time = fmt.format(zdt)
+          // val json = Map("time" -> time, "bid" -> v.bid, "min" -> v.min)
+          // val retval = JSONObject(json).toString()
+          // println(retval)
+          // retval
+        }
 //      .sum(1)
 //      .addSink(publisher)
 //      .name("kafka")
