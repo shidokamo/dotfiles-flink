@@ -46,7 +46,7 @@ object Kafka {
     properties.setProperty("bootstrap.servers", params.get("broker"))
     properties.setProperty("group.id", "org.apache.flink")
 
-    // Kafka consumer withe schema to deserialize the data
+    // Kafka consumer/publisher withe schema to deserialize/serialize the data
     val consumer = new FlinkKafkaConsumer010(params.get("topic"), new JSONKeyValueDeserializationSchema(true), properties)
     val publisher = new FlinkKafkaProducer010[String](params.get("broker"), "out", new SimpleStringSchema)
 
@@ -64,42 +64,32 @@ object Kafka {
           }
     })
 
-    // Assign watermarks
-    // val withTimestampsAndWatermarks = stream.assignAscendingTimestamps( _.getCreationTime )
-
     val data = timestamped
-//    val data = events
         .map{ x =>
           val v = x.get("value")
           val key = v.get("category").asText
           val score = v.get("score").asDouble
           val cost = v.get("cost").asDouble
+          val id = v.get("insert-id").asText
+          val time = v.get("timestamp").asText
           println(v)
-          (key, cost, score)
+          (key, cost, score, id)
         }
         .keyBy(0)
-//        .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS), Time.of(500, TimeUnit.MILLISECONDS)) // Should be after Key
-//        .timeWindow(Time.of(2500, TimeUnit.MILLISECONDS))
-//        .countWindow(5, 1)
-        .window(SlidingEventTimeWindows.of(Time.seconds(5), Time.seconds(1)))
+        .window(SlidingEventTimeWindows.of(Time.seconds(30), Time.seconds(10))) // 短すぎると安定しないので注意
         .min(1)
         .map { v =>
           println(v)
-          v
-          // val zdt = new Date(v.time).toInstant().atZone(ZoneId.systemDefault())
-          // val time = fmt.format(zdt)
-          // val json = Map("time" -> time, "bid" -> v.bid, "min" -> v.min)
-          // val retval = JSONObject(json).toString()
-          // println(retval)
-          // retval
+          val json = Map("category" -> v._1, "cost" -> v._2, "time" -> v._5, "id" -> v._4 )
+          val retval = JSONObject(json).toString()
+          println(retval)
+          retval
         }
-//      .sum(1)
-//      .addSink(publisher)
-//      .name("kafka")
+        .addSink(publisher)
+        .name("kafka")
 
     // execute and print result
-    data.print()
-    // counts.writeAsCsv(params.get("output"), "\n", " ")
+    // data.print()
 
     env.execute("Flink Scala Kafka Word Count Example")
   }
