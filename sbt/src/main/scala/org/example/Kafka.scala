@@ -6,7 +6,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+// import com.fasterxml.jackson.databind.node.ObjectNode
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode
 import scala.util.parsing.json.JSONObject
 import org.apache.flink.api.scala._
 import org.apache.flink.api.java.utils.ParameterTool
@@ -20,6 +21,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 
 object Kafka {
   val fmt = DateTimeFormatter.ISO_OFFSET_DATE_TIME
@@ -30,7 +32,7 @@ object Kafka {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     // Event Time
-    env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
+    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
 
     // Parameters
     val params: ParameterTool = ParameterTool.fromArgs(args)
@@ -51,9 +53,17 @@ object Kafka {
     // Kafka start position
     consumer.setStartFromLatest()
 
-    val stream = env.addSource(consumer)
+    val events = env.addSource(consumer)
 
-    val data = stream
+    val timestamped = events.assignTimestampsAndWatermarks(
+      new BoundedOutOfOrdernessTimestampExtractor[ObjectNode](Time.seconds(10)) {
+          override def extractTimestamp(element: ObjectNode): Long = element.get("value").get("created").asLong
+    })
+
+    // Assign watermarks
+    // val withTimestampsAndWatermarks = stream.assignAscendingTimestamps( _.getCreationTime )
+
+    val data = timestamped
         .map{ x =>
           val v = x.get("value")
           val key = v.get("category").asText
