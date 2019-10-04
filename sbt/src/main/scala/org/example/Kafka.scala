@@ -73,9 +73,9 @@ object Kafka {
           val cost = v.get("cost").asDouble
           val id = v.get("insert-id").asText
           val time = v.get("timestamp").asText
-          val created = v.get("created").asDouble
+          val count = 1
           // println(v)
-          (key, cost, score, id, time, created)
+          (key, cost, score, id, time, count)
         }
         .keyBy(0)
         .window(SlidingEventTimeWindows.of(Time.seconds(30), Time.seconds(10))) // 短すぎると安定しないので注意
@@ -85,21 +85,41 @@ object Kafka {
         .min(1)
         .map { v =>
             JSONObject(
-              Map("type" -> "min_cost", "category" -> v._1, "cost" -> v._2)
+              Map("type" -> "min_cost", "category" -> v._1, "cost" -> v._2, "time" -> v._5)
             ).toString()
         }
         .addSink(publisher)
         .name("kafka_min")
 
-    val win_avg = win
-        .avg(1)
+    val win_min_by = win
+        .minBy(1)
         .map { v =>
             JSONObject(
-              Map("type" -> "avg_cost", "category" -> v._1, "cost" -> v._2)
+              Map("type" -> "min_by_cost", "category" -> v._1, "cost" -> v._2, "time" -> v._5)
             ).toString()
         }
         .addSink(publisher)
-        .name("kafka_avg")
+        .name("kafka_min_by")
+
+    val win_max = win
+        .max(1)
+        .map { v =>
+            JSONObject(
+              Map("type" -> "max_cost", "category" -> v._1, "cost" -> v._2, "time" -> v._5)
+            ).toString()
+        }
+        .addSink(publisher)
+        .name("kafka_max")
+
+//    val win_count = win
+//        .sum(6)
+//        .map { v =>
+//            JSONObject(
+//              Map("type" -> "count", "category" -> v._1, "count" -> v._6, "time" -> v._5)
+//            ).toString()
+//        }
+//        .addSink(publisher)
+//        .name("kafka_avg")
 
     // execute and print result
     // data.print()
