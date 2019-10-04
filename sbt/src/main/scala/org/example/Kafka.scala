@@ -85,17 +85,17 @@ object Kafka {
         .min(1)
         .map { v =>
             JSONObject(
-              Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "id" -> v._4 )
+              Map("type" -> "min_cost", "category" -> v._1, "cost" -> v._2)
             ).toString()
         }
         .addSink(publisher)
         .name("kafka")
 
     val win_avg = win
-        .min(2)
+        .min(1)
         .map { v =>
             JSONObject(
-              Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "id" -> v._4 )
+              Map("type" -> "avg_cost", "category" -> v._1, "cost" -> v._2)
             ).toString()
         }
         .addSink(publisher)
