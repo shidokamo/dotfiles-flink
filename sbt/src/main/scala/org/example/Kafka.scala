@@ -148,7 +148,7 @@ class AverageAggregate extends AggregateFunction[(String, Double, Double, String
     return Accumulator(a.key, a.value + b.value, a.count + b.count)
   }
   override def add(stream: (String, Double, Double, String, String, Int), acc: Accumulator): Accumulator = {
-    return Accumulator(stream.key, acc.value + stream._2, acc.count + 1)
+    return Accumulator(stream._1, acc.value + stream._2, acc.count + 1)
   }
   override def getResult(acc: Accumulator): Accumulator = {
     return Accumulator(acc.key, acc.value / acc.count, acc.count)
