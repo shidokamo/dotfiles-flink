@@ -21,6 +21,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 
 object Kafka {
@@ -64,7 +65,7 @@ object Kafka {
           }
     })
 
-    val data = timestamped
+    val win = timestamped
         .map{ x =>
           val v = x.get("value")
           val key = v.get("category").asText
@@ -72,21 +73,37 @@ object Kafka {
           val cost = v.get("cost").asDouble
           val id = v.get("insert-id").asText
           val time = v.get("timestamp").asText
-          println(v)
-          (key, cost, score, id)
+          val created = v.get("created").asDouble
+          // println(v)
+          (key, cost, score, id, time, created)
         }
         .keyBy(0)
         .window(SlidingEventTimeWindows.of(Time.seconds(30), Time.seconds(10))) // 短すぎると安定しないので注意
-        .min(1)
-        .map { v =>
-          println(v)
-          val json = Map("category" -> v._1, "cost" -> v._2, "time" -> v._5, "id" -> v._4 )
-          val retval = JSONObject(json).toString()
-          println(retval)
-          retval
-        }
+//        .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+
+    def to_json(v: ) String = {
+        val json = Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "created" -> v._6, "id" -> v._4 )
+        val retval = JSONObject(json).toString()
+        retval
+    }
+
+
+    val win_min = win
+        .min(2)
+        .map { to_json(v) }
         .addSink(publisher)
         .name("kafka")
+
+    // val win_avg = win
+    //     .avg(2)
+    //     .map { v =>
+    //       val json = Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "created" -> v._6, "id" -> v._4 )
+    //       val retval = JSONObject(json).toString()
+    //       println(retval)
+    //       retval
+    //     }
+    //     .addSink(publisher)
+    //     .name("kafka")
 
     // execute and print result
     // data.print()
