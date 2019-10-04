@@ -138,6 +138,7 @@ object Kafka {
   }
 }
 
+// Accumulator には、case class が使えるけど、Stream には使えないっぽい。
 case class Stream(key: String, cost: Double, a: Double, b: String, c: String, d: Int)
 case class Accumulator(key: String, value: Double, count: Int)
 class AverageAggregate extends AggregateFunction[(String, Double, Double, String, String, Int), Accumulator, Accumulator] {
