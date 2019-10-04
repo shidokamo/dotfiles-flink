@@ -133,7 +133,7 @@ object Kafka {
       override def add(value: Stream, acc: Accumulator): Accumulator = {
         return Accumulator(acc.sum + value.cost, acc.count + 1)
       }
-      override def getResult(acc: Accumulator) = {
+      override def getResult(acc: Accumulator): Accumulator = {
         return Accumulator(acc.key, acc.sum / acc.count, acc.count)
       }
     }
