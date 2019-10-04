@@ -121,25 +121,8 @@ object Kafka {
         .addSink(publisher)
         .name("kafka_count")
 
-    case class Stream(key: String, cost: Double, a: Double, b: String, c: String, d: Int)
-    case class Accumulator(key: String, sum: Double, count: Int)
-    class AverageAggregate extends AggregateFunction[Stream, Accumulator, Accumulator] {
-      override def createAccumulator(): Accumulator = {
-        return Accumulator("", 0.0, 0)
-      }
-      override def merge(a: Accumulator, b: Accumulator): Accumulator = {
-        return Accumulator(a.key, a.sum + b.sum, a.count + b.count)
-      }
-      override def add(value: Stream, acc: Accumulator): Accumulator = {
-        return Accumulator(acc.sum + value.cost, acc.count + 1)
-      }
-      override def getResult(acc: Accumulator): Accumulator = {
-        return Accumulator(acc.key, acc.sum / acc.count, acc.count)
-      }
-    }
-
     val win_avg = win
-        .aggregate(new AverageAggregate)
+        .aggregate(new AverageAggregate())
         .map { v =>
             JSONObject(
               Map("type" -> "average", "category" -> v._1, "cost" -> v._2)
@@ -152,5 +135,22 @@ object Kafka {
     // data.print()
 
     env.execute("Flink Scala Kafka Word Count Example")
+  }
+}
+
+case class Stream(key: String, cost: Double, a: Double, b: String, c: String, d: Int)
+case class Accumulator(key: String, sum: Double, count: Int)
+class AverageAggregate extends AggregateFunction[Stream, Accumulator, Accumulator] {
+  override def createAccumulator(): Accumulator = {
+    return Accumulator("", 0.0, 0)
+  }
+  override def merge(a: Accumulator, b: Accumulator): Accumulator = {
+    return Accumulator(a.key, a.sum + b.sum, a.count + b.count)
+  }
+  override def add(value: Stream, acc: Accumulator): Accumulator = {
+    return Accumulator(acc.key, acc.sum + value.cost, acc.count + 1)
+  }
+  override def getResult(acc: Accumulator): Accumulator = {
+    return Accumulator(acc.key, acc.sum / acc.count, acc.count)
   }
 }
