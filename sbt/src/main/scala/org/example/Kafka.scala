@@ -86,8 +86,7 @@ object Kafka {
         .map { v =>
             JSONObject(
               Map("type" -> "min_cost", "category" -> v._1, "cost" -> v._2, "time" -> v._5)
-            ).toString()
-        }
+            ).toString() }
         .addSink(publisher)
         .name("kafka_min")
 
@@ -112,14 +111,14 @@ object Kafka {
         .name("kafka_max")
 
     val win_count = win
-        .sum(6)
+        .sum(5)
         .map { v =>
             JSONObject(
               Map("type" -> "count", "category" -> v._1, "count" -> v._6, "time" -> v._5)
             ).toString()
         }
         .addSink(publisher)
-        .name("kafka_count")
+        .name("kafka_avg")
 
     // execute and print result
     // data.print()
