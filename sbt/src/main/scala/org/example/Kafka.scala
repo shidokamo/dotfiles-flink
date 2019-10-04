@@ -89,7 +89,7 @@ object Kafka {
             ).toString()
         }
         .addSink(publisher)
-        .name("kafka")
+        .name("kafka_min")
 
     val win_avg = win
         .min(1)
@@ -99,7 +99,7 @@ object Kafka {
             ).toString()
         }
         .addSink(publisher)
-        .name("kafka")
+        .name("kafka_avg")
 
     // execute and print result
     // data.print()
