@@ -92,7 +92,7 @@ object Kafka {
         .name("kafka_min")
 
     val win_avg = win
-        .min(1)
+        .avg(1)
         .map { v =>
             JSONObject(
               Map("type" -> "avg_cost", "category" -> v._1, "cost" -> v._2)
