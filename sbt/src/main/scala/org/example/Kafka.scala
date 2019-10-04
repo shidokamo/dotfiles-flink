@@ -23,6 +23,7 @@ import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
+import org.apache.flink.api.common.functions.AggregateFunction
 
 object Kafka {
   val fmt = DateTimeFormatter.ISO_OFFSET_DATE_TIME
@@ -104,7 +105,7 @@ object Kafka {
         .max(1)
         .map { v =>
             JSONObject(
-              Map("type" -> "max_cost", "category" -> v._1, "cost" -> v._2, "time" -> v._5)
+              Map("type" -> "max_cost", "category" -> v._1, "cost" -> v._2)
             ).toString()
         }
         .addSink(publisher)
@@ -114,7 +115,34 @@ object Kafka {
         .sum(5)
         .map { v =>
             JSONObject(
-              Map("type" -> "count", "category" -> v._1, "count" -> v._6, "time" -> v._5)
+              Map("type" -> "count", "category" -> v._1, "count" -> v._6)
+            ).toString()
+        }
+        .addSink(publisher)
+        .name("kafka_count")
+
+    case class Stream(key: String, cost: Double, a: Double, b: String, c: String, d: Int)
+    case class Accumulator(sum: Double, count: Int)
+    class AverageAggregate extends AggregateFunction[Stream, Accumulator, Double] {
+      override def createAccumulator(): Accumulator = {
+        return Accumulator(0.0, 0)
+      }
+      override def merge(a: Accumulator, b: Accumulator): Accumulator = {
+        return Accumulator(a.sum + b.sum, a.count + b.count)
+      }
+      override def add(value: Stream, acc: Accumulator) = {
+        return Accumulator(acc.sum + value.cost, acc.count + 1L)
+      }
+      override def getResult(acc: Accumulator) = {
+        acc.sum / acc.count
+      }
+    }
+
+    val win_avg = win
+        .aggregate(new AverageAggregate)
+        .map { v =>
+            JSONObject(
+              Map("type" -> "count", "category" -> v._1, "count" -> v._6)
             ).toString()
         }
         .addSink(publisher)
