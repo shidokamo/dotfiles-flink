@@ -125,7 +125,7 @@ object Kafka {
         .aggregate(new AverageAggregate())
         .map { v =>
             JSONObject(
-              Map("type" -> "average", "category" -> v._1, "cost" -> v._2)
+              Map("type" -> "average", "category" -> v.key, "cost" -> v.value)
             ).toString()
         }
         .addSink(publisher)
@@ -139,18 +139,18 @@ object Kafka {
 }
 
 case class Stream(key: String, cost: Double, a: Double, b: String, c: String, d: Int)
-case class Accumulator(key: String, sum: Double, count: Int)
-class AverageAggregate extends AggregateFunction[Stream, Accumulator, Accumulator] {
+case class Accumulator(key: String, value: Double, count: Int)
+class AverageAggregate extends AggregateFunction[(String, Double, Double, String, String, Int), Accumulator, Accumulator] {
   override def createAccumulator(): Accumulator = {
     return Accumulator("", 0.0, 0)
   }
   override def merge(a: Accumulator, b: Accumulator): Accumulator = {
-    return Accumulator(a.key, a.sum + b.sum, a.count + b.count)
+    return Accumulator(a.key, a.value + b.value, a.count + b.count)
   }
-  override def add(value: Stream, acc: Accumulator): Accumulator = {
-    return Accumulator(acc.key, acc.sum + value.cost, acc.count + 1)
+  override def add(stream: (String, Double, Double, String, String, Int), acc: Accumulator): Accumulator = {
+    return Accumulator(stream.key, acc.value + stream._2, acc.count + 1)
   }
   override def getResult(acc: Accumulator): Accumulator = {
-    return Accumulator(acc.key, acc.sum / acc.count, acc.count)
+    return Accumulator(acc.key, acc.value / acc.count, acc.count)
   }
 }
