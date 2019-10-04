@@ -81,28 +81,25 @@ object Kafka {
         .window(SlidingEventTimeWindows.of(Time.seconds(30), Time.seconds(10))) // 短すぎると安定しないので注意
 //        .window(TumblingEventTimeWindows.of(Time.seconds(10)))
 
-    val to_json : (a: String, b: Double, c: Double, d: String, e: String, f: Double) => {
-        val json = Map("category" -> a, "cost" -> b, "score" -> c, "id" -> d, "time" -> e)
-        JSONObject(json).toString()
-    }
-
-
     val win_min = win
-        .min(2)
-        .map { to_json }
+        .min(1)
+        .map { v =>
+            JSONObject(
+              Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "id" -> v._4 )
+            ).toString()
+        }
         .addSink(publisher)
         .name("kafka")
 
-    // val win_avg = win
-    //     .avg(2)
-    //     .map { v =>
-    //       val json = Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "created" -> v._6, "id" -> v._4 )
-    //       val retval = JSONObject(json).toString()
-    //       println(retval)
-    //       retval
-    //     }
-    //     .addSink(publisher)
-    //     .name("kafka")
+    val win_avg = win
+        .min(2)
+        .map { v =>
+            JSONObject(
+              Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "id" -> v._4 )
+            ).toString()
+        }
+        .addSink(publisher)
+        .name("kafka")
 
     // execute and print result
     // data.print()
