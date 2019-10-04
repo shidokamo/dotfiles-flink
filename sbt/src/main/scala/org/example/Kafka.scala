@@ -81,16 +81,15 @@ object Kafka {
         .window(SlidingEventTimeWindows.of(Time.seconds(30), Time.seconds(10))) // 短すぎると安定しないので注意
 //        .window(TumblingEventTimeWindows.of(Time.seconds(10)))
 
-    def to_json(v: ) String = {
-        val json = Map("category" -> v._1, "cost" -> v._2, "score" -> v._3, "time" -> v._5, "created" -> v._6, "id" -> v._4 )
-        val retval = JSONObject(json).toString()
-        retval
+    val to_json : (a: String, b: Double, c: Double, d: String, e: String, f: Double) => {
+        val json = Map("category" -> a, "cost" -> b, "score" -> c, "id" -> d, "time" -> e)
+        JSONObject(json).toString()
     }
 
 
     val win_min = win
         .min(2)
-        .map { to_json(v) }
+        .map { to_json }
         .addSink(publisher)
         .name("kafka")
 
